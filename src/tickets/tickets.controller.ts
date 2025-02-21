@@ -36,8 +36,6 @@ export class TicketsController {
   ) {
     const user = req['user'];
 
-    console.log('user', user);
-
     return await this.ticketsService.updateTicket({
       ...updateTicketDto,
       id: parseInt(id), 
