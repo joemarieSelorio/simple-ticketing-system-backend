@@ -1,6 +1,7 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { TicketsService } from './tickets.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
+import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../common/enums/user-role.enum';
@@ -20,7 +21,28 @@ export class TicketsController {
     return await this.ticketsService.createTicket({
       ...createTicketDto,
       createdBy: user,
-      assignedAdminEmail: createTicketDto.assignee,
+      assignedEmail: createTicketDto.assignee,
+    });
+  }
+
+  @Roles(UserRole.USER, UserRole.ADMIN)
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @Patch('/:id')
+  async updateTicket(
+    @Param('id') id: string,
+    @Body() updateTicketDto: UpdateTicketDto,
+    @Req() req: Request,
+  ) {
+    const user = req['user'];
+
+    console.log('user', user);
+
+    return await this.ticketsService.updateTicket({
+      ...updateTicketDto,
+      id: parseInt(id), 
+      user,
+      assignedEmail: updateTicketDto.assignee,
     });
   }
 }

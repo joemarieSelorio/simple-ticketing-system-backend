@@ -36,6 +36,11 @@ export class CreateTicketTable1740108461401 implements MigrationInterface {
             default: `'${TicketStatusEnum.DRAFT}'`,
           },
           {
+            name: 'rejection_reason',
+            type: 'varchar',
+            isNullable: true,
+          },
+          {
             name: 'created_by_id',
             type: 'int',
             isNullable: false,

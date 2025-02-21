@@ -24,6 +24,9 @@ export class Ticket {
   @Column()
   status: string;
 
+  @Column({nullable: true})
+  rejection_reason: string;
+
   @ManyToOne(() => User, (user) => user.createdTickets)
   @JoinColumn({ name: 'created_by_id' })
   createdBy: User;
