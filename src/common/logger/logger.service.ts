@@ -1,4 +1,3 @@
-// src/common/logger/simple-logger.service.ts
 import { Injectable, LoggerService } from '@nestjs/common';
 
 enum LogLevel {

@@ -1,12 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
 import {TransformResponseInterceptor} from './common/interceptors/transform-response.interceptors';
 import {LoggingInterceptor} from './common/interceptors/logging.interceptors';
 import {HttpExceptionFilter} from './common/filters/http-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { LoggingService } from './common/logger/logger.service';
-import * as dotenv from 'dotenv';
 
 const whitelist = [process.env.WEB_URL];
 
@@ -25,15 +23,6 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      errorHttpStatusCode: 422,
-    }),
-  );
-
   app.useGlobalInterceptors(
     new LoggingInterceptor(),
     new TransformResponseInterceptor(),
@@ -51,7 +40,6 @@ async function bootstrap() {
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 
-  
   logger.log('Application started listening to port: ', process.env.PORT);
 
   await app.listen(process.env.PORT ?? 8080);

@@ -2,6 +2,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import { SeederOptions } from 'typeorm-extension';
 import * as dotenv from 'dotenv';
 import { User } from './src/users/users.entity';
+import { Ticket } from './src/tickets/ticket.entity';
 dotenv.config();
 
 const options: DataSourceOptions & SeederOptions = {
@@ -15,7 +16,7 @@ const options: DataSourceOptions & SeederOptions = {
   logging: true,
   synchronize: false,
   name: 'default',
-  entities: [User],
+  entities: [User, Ticket],
   migrations: ['src/db/migrations/**/*{.ts,.js}'],
   seeds: ['src/db/seeders/**/*{seeder.ts,seeder.js}'],
 };
