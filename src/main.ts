@@ -5,6 +5,7 @@ import {LoggingInterceptor} from './common/interceptors/logging.interceptors';
 import {HttpExceptionFilter} from './common/filters/http-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { LoggingService } from './common/logger/logger.service';
+import { ValidationPipe } from '@nestjs/common';
 
 const whitelist = [process.env.WEB_URL];
 
@@ -27,6 +28,8 @@ async function bootstrap() {
     new LoggingInterceptor(),
     new TransformResponseInterceptor(),
   );
+
+  app.useGlobalPipes(new ValidationPipe());
 
   app.useGlobalFilters(new HttpExceptionFilter());
 

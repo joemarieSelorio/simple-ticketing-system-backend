@@ -1,17 +1,15 @@
-import { Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Repository, InsertResult, UpdateResult } from 'typeorm';
-import { InjectRepository} from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { BadRequestException } from '@nestjs/common';
 import { User } from './users.entity';
 import * as bcrypt from 'bcrypt';
-
 
 @Injectable()
 export class UsersService {
   constructor(@InjectRepository(User) private usersRepository: Repository<User>) {}
 
-  async create({email, password, role}): Promise<InsertResult> {
-
+  async create({ email, password, role }): Promise<Number | null> {
     const existingUser = await this.usersRepository.findOne({
       where: {
         email,
@@ -24,10 +22,26 @@ export class UsersService {
 
     const hashedPassword = (await bcrypt.hash(password, 10)) as string;
 
-    return this.usersRepository.insert({
+    const newUser =  this.usersRepository.create({
       email,
       password: hashedPassword,
-      role
+      role,
     });
+
+    const result = await this.usersRepository.save({
+      email,
+      password: hashedPassword,
+      role,
+    });
+
+    return result.id;
+  }
+
+  async getUserByEmailAndRole(email: string, role: string): Promise<User | null> {
+    return await this.usersRepository
+      .createQueryBuilder('users')
+      .where('users.email = :email', { email, })
+      .andWhere('users.role = :role', { role, })
+      .getOne();
   }
 }

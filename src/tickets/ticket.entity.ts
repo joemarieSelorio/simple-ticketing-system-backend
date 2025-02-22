@@ -6,8 +6,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from '../users/users.entity';
+import { AuditLog } from '../audits/audits.entity';
 
 @Entity({ name: 'tickets' })
 export class Ticket {
@@ -24,8 +26,12 @@ export class Ticket {
   @Column()
   status: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   rejection_reason: string;
+
+  @Column({ nullable: true })
+  priority: number;
+  
 
   @ManyToOne(() => User, (user) => user.createdTickets)
   @JoinColumn({ name: 'created_by_id' })
@@ -34,6 +40,9 @@ export class Ticket {
   @ManyToOne(() => User, (user) => user.assignedTickets, { nullable: true })
   @JoinColumn({ name: 'assigned_to_id' })
   assignedTo: User;
+
+  @OneToMany(() => AuditLog, (auditLog) => auditLog.ticket)
+  auditLogs: AuditLog[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

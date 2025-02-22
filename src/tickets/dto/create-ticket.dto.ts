@@ -1,25 +1,21 @@
-
 import { TicketStatusEnum } from '../../common/enums/ticket-status-enum';
-import { IsNotEmpty, IsString, IsEnum, IsNumber, IsEmail } from 'class-validator';
+import { IsNotEmpty, IsString, IsIn, IsEmail, IsOptional } from 'class-validator';
 
 export class CreateTicketDto {
   @IsNotEmpty()
   @IsString()
   title: string;
 
+  @IsOptional()
   @IsString()
   description: string;
 
   @IsNotEmpty()
-  @IsEnum(TicketStatusEnum)
+  @IsIn([TicketStatusEnum.CREATED, TicketStatusEnum.SUBMITTED])
   status: TicketStatusEnum;
 
-  @IsNotEmpty()
-  @IsNumber()
-  userId: number;
-  
+  @IsOptional()
   @IsString()
   @IsEmail()
   assignee: string;
 }
-

@@ -17,7 +17,6 @@ export class CreateTicketTable1740108461401 implements MigrationInterface {
           {
             name: 'title',
             type: 'varchar',
-            isUnique: true,
             isNullable: false,
           },
           {
@@ -28,12 +27,12 @@ export class CreateTicketTable1740108461401 implements MigrationInterface {
             name: 'status',
             type: 'enum',
             enum: [
-              TicketStatusEnum.REQUESTED,
-              TicketStatusEnum.DRAFT,
-              TicketStatusEnum.REJECTED,
               TicketStatusEnum.APPROVED,
+              TicketStatusEnum.CREATED,
+              TicketStatusEnum.SUBMITTED,
+              TicketStatusEnum.REJECTED,
             ],
-            default: `'${TicketStatusEnum.DRAFT}'`,
+            default: `'${TicketStatusEnum.CREATED}'`,
           },
           {
             name: 'rejection_reason',
@@ -49,6 +48,12 @@ export class CreateTicketTable1740108461401 implements MigrationInterface {
             name: 'assigned_to_id',
             type: 'int',
             isNullable: true,
+          },
+          {
+            name: 'priority',
+            type: 'int',
+            isNullable: false,
+            default: 0,
           },
           {
             name: 'created_at',

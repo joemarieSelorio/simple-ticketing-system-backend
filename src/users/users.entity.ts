@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Ticket } from '../tickets/ticket.entity';
-
+import { AuditLog } from '../audits/audits.entity';
 @Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn()
@@ -27,6 +27,10 @@ export class User {
   
   @OneToMany(() => Ticket, (ticket) => ticket.assignedTo)
   assignedTickets: Ticket[];
+
+  
+  @OneToMany(() => AuditLog, (audit) => audit.performedBy)
+  auditLogs: AuditLog[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

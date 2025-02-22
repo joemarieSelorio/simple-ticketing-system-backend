@@ -15,7 +15,15 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @Post('/')
-  async CreateUserDto(@Body() createUserDto: CreateUserDto): Promise<InsertResult> {
-    return await this.usersService.create(createUserDto);
+  async CreateUserDto(@Body() createUserDto: CreateUserDto): Promise<{
+    id: Number | null,
+    message: string,
+  }> {
+    const id =  await this.usersService.create(createUserDto);
+
+    return {
+      id,
+      message: 'User created successfully',
+    }
   }
 }
