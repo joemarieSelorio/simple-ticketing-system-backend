@@ -4,7 +4,9 @@ import { UserRole } from '../common/enums/user-role.enum';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { AuthGuard } from '../common/guards/auth.guard';
+import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 
+@ApiTags('audits')
 @Controller('audits')
 export class AuditsController {
   constructor(private readonly auditsService: AuditsService) { }
@@ -12,6 +14,10 @@ export class AuditsController {
     @UseGuards(RolesGuard)
     @UseGuards(AuthGuard)
     @Get('/')
+    @ApiOperation({ summary: 'Create audit log' })
+    @ApiResponse({ status: 200, description: 'Success' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 400, description: 'BadRequest' })
     async getSubmittedTickets(
       @Query('page') page: number,
       @Query('limit') limit: number,

@@ -37,14 +37,6 @@ export class TicketsService {
       assignee = createdBy;
     }
 
-    console.log('assignee', {
-      title,
-      description,
-      status,
-      createdBy: createdBy,
-      assignedTo: assignee as User,
-    });
-
     const newTicket = this.ticketRepository.create({
       title,
       description,
@@ -198,12 +190,22 @@ export class TicketsService {
     };
   }
 
-  async getAssignedTickets({ adminUserId, page = 1, limit = 10 }) {
+  async getAllTickets({
+    page = 1,
+    limit = 10,
+    assigned,
+    userId,
+  }): Promise<{
+    tickets: Ticket[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
     const validatedLimit = Math.min(100, Math.max(1, limit));
     const validatedPage = Math.max(1, page);
     const skip = (validatedPage - 1) * validatedLimit;
 
-    const [tickets, total] = await this.ticketRepository
+    const query = this.ticketRepository
       .createQueryBuilder('tickets')
       .select([
         'tickets.id',
@@ -218,12 +220,17 @@ export class TicketsService {
       ])
       .leftJoin('tickets.createdBy', 'createdBy')
       .leftJoin('tickets.assignedTo', 'assignedTo')
-      .where('tickets.assignedTo = :id', { id: adminUserId })
       .orderBy('tickets.priority', 'ASC')
       .addOrderBy('tickets.createdAt', 'DESC')
       .skip(skip)
-      .take(validatedLimit)
-      .getManyAndCount();
+      .take(validatedLimit);
+
+    // Add a dynamic condition if isAssigned is true.
+    if (assigned) {
+      query.where('tickets.assignedTo = :id', { id: userId });
+    }
+
+    const [tickets, total] = await query.getManyAndCount();
 
     return {
       tickets,

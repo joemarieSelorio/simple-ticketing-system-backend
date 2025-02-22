@@ -1,23 +1,27 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { TicketsService } from './tickets.service';
-import { AuditsService } from '../audits/audits.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
+import { GetTicketsQueryDto } from './dto/get-admin-ticket.dto';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../common/enums/user-role.enum';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 
+@ApiTags('tickets')
 @Controller('tickets')
 export class TicketsController {
-  constructor(
-    private readonly ticketsService: TicketsService,
-  ) {}
+  constructor(private readonly ticketsService: TicketsService) {}
 
   @Roles(UserRole.USER, UserRole.ADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @Post('/')
+  @ApiOperation({ summary: 'Create new ticket' })
+  @ApiResponse({ status: 200, description: 'Success' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 400, description: 'BadRequest' })
   async createTicket(@Body() createTicketDto: CreateTicketDto, @Req() req: Request) {
     const user = req['user'];
     const result = await this.ticketsService.createTicket({
@@ -33,6 +37,10 @@ export class TicketsController {
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @Patch('/:id')
+  @ApiOperation({ summary: 'Update ticket' })
+  @ApiResponse({ status: 200, description: 'Success' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 400, description: 'BadRequest' })
   async updateTicket(
     @Param('id') id: number,
     @Body() updateTicketDto: UpdateTicketDto,
@@ -51,6 +59,10 @@ export class TicketsController {
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @Get('/')
+  @ApiOperation({ summary: 'Get user submitted tickets' })
+  @ApiResponse({ status: 200, description: 'Success' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 400, description: 'BadRequest' })
   async getSubmittedTickets(
     @Query('page') page: number,
     @Query('limit') limit: number,
@@ -68,17 +80,23 @@ export class TicketsController {
   @Roles(UserRole.ADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
-  @Get('/admin/assigned')
+  @Get('/admin')
+  @ApiOperation({ summary: 'Get all tickets' })
+  @ApiResponse({ status: 200, description: 'Success' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 400, description: 'BadRequest' })
   async getAssignedTickets(
-    @Query('page') page: number,
-    @Query('limit') limit: number,
+    @Query() query: GetTicketsQueryDto,
     @Req() req: Request,
   ) {
     const user = req['user'];
-    return await this.ticketsService.getAssignedTickets({
-      adminUserId: parseInt(user.id),
-      page,
-      limit,
+    const isAssignedBool = query?.assigned === 'true';
+
+    return await this.ticketsService.getAllTickets({
+      page: query.page,
+      limit: query.limit,
+      userId: parseInt(user.id),
+      assigned: isAssignedBool,
     });
   }
 }

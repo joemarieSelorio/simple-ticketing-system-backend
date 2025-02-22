@@ -6,6 +6,11 @@ import {HttpExceptionFilter} from './common/filters/http-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { LoggingService } from './common/logger/logger.service';
 import { ValidationPipe } from '@nestjs/common';
+import * as dotenv from 'dotenv';
+
+
+// Load environment variables from .env file
+dotenv.config();
 
 const whitelist = [process.env.WEB_URL];
 
