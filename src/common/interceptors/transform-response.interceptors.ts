@@ -9,7 +9,6 @@ import { map } from 'rxjs/operators';
 import { Response as ExpressResponse } from 'express';
 
 interface Response<T> {
-  data: T;
   status: number;
   message: string;
   timestamp: string;
@@ -25,7 +24,7 @@ export class TransformResponseInterceptor<T>
   ): Observable<Response<T>> {
     return next.handle().pipe(
       map((data: T) => ({
-        data,
+        ...data,
         status: context.switchToHttp().getResponse<ExpressResponse>()
           .statusCode,
         message: 'Success',

@@ -2,12 +2,14 @@ import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from
 import { TicketsService } from './tickets.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
-import { GetTicketsQueryDto } from './dto/get-admin-ticket.dto';
+import { GetAdminTicketsQueryDto } from './dto/get-admin-ticket.dto';
+import { GetTicketsQueryDto } from './dto/get-tickets.dto';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../common/enums/user-role.enum';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { query } from 'express';
 
 @ApiTags('tickets')
 @Controller('tickets')
@@ -58,17 +60,18 @@ export class TicketsController {
   @Roles(UserRole.USER, UserRole.ADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
-  @Get('/')
+  @Get('/me')
   @ApiOperation({ summary: 'Get user submitted tickets' })
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 400, description: 'BadRequest' })
   async getSubmittedTickets(
-    @Query('page') page: number,
-    @Query('limit') limit: number,
+    @Query() query: GetTicketsQueryDto,
     @Req() req: Request,
   ) {
     const user = req['user'];
+
+    const {page, limit} = query;
 
     return await this.ticketsService.getUserTickets({
       userId: parseInt(user.id),
@@ -86,7 +89,7 @@ export class TicketsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 400, description: 'BadRequest' })
   async getAssignedTickets(
-    @Query() query: GetTicketsQueryDto,
+    @Query() query: GetAdminTicketsQueryDto,
     @Req() req: Request,
   ) {
     const user = req['user'];

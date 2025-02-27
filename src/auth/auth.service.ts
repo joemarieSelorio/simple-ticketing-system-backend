@@ -14,18 +14,19 @@ export class AuthService {
   ) {}
 
   async login({email, password}) : Promise<{ access_token: string }> {
+    const message = 'Invalid credentials';
     const user = await this.usersRepository.findOne({
       where: { email },
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(message);
     }
 
     const hasSamePassword = await bcrypt.compare(password, user.password);
 
     if (!hasSamePassword) {
-      throw new BadRequestException('Invalid credentials');
+      throw new BadRequestException(message);
     }
 
     const payload = { id: user.id, username: user.email, role: user.role };

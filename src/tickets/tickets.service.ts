@@ -9,11 +9,13 @@ import { TicketStatusEnum } from '../common/enums/ticket-status-enum';
 import { AuditsService } from '../audits/audits.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { processBatchedArray } from '../common/utils/process-batched-array-';
+import { LoggingService } from '../common/logger/logger.service';
 
 @Injectable()
 export class TicketsService {
   constructor(
     @InjectRepository(Ticket) private readonly ticketRepository: Repository<Ticket>,
+    private readonly loggerService: LoggingService,
     private readonly userService: UsersService,
     private readonly auditsService: AuditsService,
   ) {}
@@ -157,7 +159,7 @@ export class TicketsService {
     return result.raw[0];
   }
 
-  async getUserTickets({ userId, page = 1, limit = 10 }) {
+  async getUserTickets({ userId, page = 1, limit = 5 }) {
     const validatedLimit = Math.min(100, Math.max(1, limit));
     const validatedPage = Math.max(1, page);
     const skip = (validatedPage - 1) * validatedLimit;
@@ -167,6 +169,7 @@ export class TicketsService {
       .select([
         'tickets.id',
         'tickets.title',
+        'tickets.description',
         'tickets.status',
         'tickets.priority',
         'tickets.createdAt',
@@ -177,6 +180,8 @@ export class TicketsService {
       ])
       .leftJoin('tickets.createdBy', 'createdBy')
       .leftJoin('tickets.assignedTo', 'assignedTo')
+      .orderBy('tickets.priority', 'DESC')
+      .addOrderBy('tickets.createdAt', 'DESC')
       .where('tickets.createdBy = :id', { id: userId })
       .skip(skip)
       .take(validatedLimit)
@@ -192,7 +197,7 @@ export class TicketsService {
 
   async getAllTickets({
     page = 1,
-    limit = 10,
+    limit = 5,
     assigned,
     userId,
   }): Promise<{
@@ -210,6 +215,7 @@ export class TicketsService {
       .select([
         'tickets.id',
         'tickets.title',
+        'tickets.description',
         'tickets.status',
         'tickets.priority',
         'tickets.createdAt',
@@ -220,7 +226,7 @@ export class TicketsService {
       ])
       .leftJoin('tickets.createdBy', 'createdBy')
       .leftJoin('tickets.assignedTo', 'assignedTo')
-      .orderBy('tickets.priority', 'ASC')
+      .orderBy('tickets.priority', 'DESC')
       .addOrderBy('tickets.createdAt', 'DESC')
       .skip(skip)
       .take(validatedLimit);
@@ -248,14 +254,14 @@ export class TicketsService {
       const tickets = await this.ticketRepository
         .createQueryBuilder('tickets')
         .select(['tickets.id', 'tickets.priority', 'tickets.createdAt'])
-        .where('tickets.status = :status', { status: TicketStatusEnum.CREATED })
+        .where('tickets.status = :status', { status: TicketStatusEnum.SUBMITTED })
         .andWhere(`tickets.created_at < NOW() - INTERVAL '24 hours'`)
         .orderBy('tickets.createdAt', 'ASC')
         .getMany();
-
       await processBatchedArray(tickets, BATCH_SIZE, this.batchUpdateTickets.bind(this));
+      this.loggerService.log('Ticket priority updated successfully');
     } catch (error) {
-      console.log('error', error);
+      this.loggerService.error('Error updating ticket priority', error);
     }
   }
 

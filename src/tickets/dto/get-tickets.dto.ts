@@ -1,12 +1,7 @@
 import { IsOptional, IsBooleanString, IsNumberString, IsIn } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-export class GetAdminTicketsQueryDto {
-  @IsOptional()
-  @IsIn(['true', 'false'])
-  @ApiPropertyOptional({ description: 'Filter by assigned status', enum: ['true', 'false'] })
-  assigned?: string;
-
+export class GetTicketsQueryDto {
   @IsNumberString()
   @IsOptional()
   @ApiPropertyOptional({ description: 'Page number', default: 1 })
