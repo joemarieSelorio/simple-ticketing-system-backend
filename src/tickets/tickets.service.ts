@@ -181,9 +181,9 @@ export class TicketsService {
       `CASE 
          WHEN tickets.status = 'priority' THEN 1
          WHEN tickets.status = 'approved' THEN 2
-         WHEN tickets.status = 'created' THEN 3
-         WHEN tickets.status = 'requested' THEN 4
-         WHEN tickets.status = 'rejected' THEN 5
+         WHEN tickets.status = 'requested' THEN 3
+         WHEN tickets.status = 'rejected' THEN 4
+         WHEN tickets.status = 'created' THEN 5
          ELSE 6
        END`,
       'status_order'
@@ -233,9 +233,9 @@ export class TicketsService {
         `CASE 
            WHEN tickets.status = 'priority' THEN 1
            WHEN tickets.status = 'approved' THEN 2
-           WHEN tickets.status = 'created' THEN 3
-           WHEN tickets.status = 'requested' THEN 4
-           WHEN tickets.status = 'rejected' THEN 5
+           WHEN tickets.status = 'requested' THEN 3
+           WHEN tickets.status = 'rejected' THEN 4
+           WHEN tickets.status = 'created' THEN 5
            ELSE 6
          END`,
         'status_order'
