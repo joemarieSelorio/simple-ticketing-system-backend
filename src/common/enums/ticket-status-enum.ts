@@ -1,6 +1,7 @@
 export enum TicketStatusEnum {
-  SUBMITTED = 'submitted',
+  REQUESTED = 'requested',
   CREATED = 'created',
   REJECTED = 'rejected',
   APPROVED = 'approved',
+  PRIORITY = 'priority',
 }

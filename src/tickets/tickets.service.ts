@@ -165,27 +165,38 @@ export class TicketsService {
     const skip = (validatedPage - 1) * validatedLimit;
 
     const [tickets, total] = await this.ticketRepository
-      .createQueryBuilder('tickets')
-      .select([
-        'tickets.id',
-        'tickets.title',
-        'tickets.description',
-        'tickets.status',
-        'tickets.priority',
-        'tickets.createdAt',
-        'createdBy.id',
-        'createdBy.email',
-        'assignedTo.id',
-        'assignedTo.email',
-      ])
-      .leftJoin('tickets.createdBy', 'createdBy')
-      .leftJoin('tickets.assignedTo', 'assignedTo')
-      .orderBy('tickets.priority', 'DESC')
-      .addOrderBy('tickets.createdAt', 'DESC')
-      .where('tickets.createdBy = :id', { id: userId })
-      .skip(skip)
-      .take(validatedLimit)
-      .getManyAndCount();
+    .createQueryBuilder('tickets')
+    .select([
+      'tickets.id',
+      'tickets.title',
+      'tickets.description',
+      'tickets.status',
+      'tickets.createdAt',
+      'createdBy.id',
+      'createdBy.email',
+      'assignedTo.id',
+      'assignedTo.email',
+    ])
+    .addSelect(
+      `CASE 
+         WHEN tickets.status = 'priority' THEN 1
+         WHEN tickets.status = 'approved' THEN 2
+         WHEN tickets.status = 'created' THEN 3
+         WHEN tickets.status = 'requested' THEN 4
+         WHEN tickets.status = 'rejected' THEN 5
+         ELSE 6
+       END`,
+      'status_order'
+    )
+    .leftJoin('tickets.createdBy', 'createdBy')
+    .leftJoin('tickets.assignedTo', 'assignedTo')
+    .orderBy('status_order', 'ASC')
+    .addOrderBy('tickets.createdAt', 'DESC')
+    .where('tickets.createdBy = :id', { id: userId })
+    .skip(skip)
+    .take(validatedLimit)
+    .getManyAndCount();
+
 
     return {
       tickets,
@@ -195,12 +206,7 @@ export class TicketsService {
     };
   }
 
-  async getAllTickets({
-    page = 1,
-    limit = 5,
-    assigned,
-    userId,
-  }): Promise<{
+  async getAllTickets({ page = 1, limit = 5, assigned, userId }): Promise<{
     tickets: Ticket[];
     total: number;
     page: number;
@@ -217,16 +223,26 @@ export class TicketsService {
         'tickets.title',
         'tickets.description',
         'tickets.status',
-        'tickets.priority',
         'tickets.createdAt',
         'createdBy.id',
         'createdBy.email',
         'assignedTo.id',
         'assignedTo.email',
       ])
+      .addSelect(
+        `CASE 
+           WHEN tickets.status = 'priority' THEN 1
+           WHEN tickets.status = 'approved' THEN 2
+           WHEN tickets.status = 'created' THEN 3
+           WHEN tickets.status = 'requested' THEN 4
+           WHEN tickets.status = 'rejected' THEN 5
+           ELSE 6
+         END`,
+        'status_order'
+      )
       .leftJoin('tickets.createdBy', 'createdBy')
       .leftJoin('tickets.assignedTo', 'assignedTo')
-      .orderBy('tickets.priority', 'DESC')
+      .orderBy('status_order', 'ASC')
       .addOrderBy('tickets.createdAt', 'DESC')
       .skip(skip)
       .take(validatedLimit);
@@ -253,8 +269,8 @@ export class TicketsService {
       const BATCH_SIZE = 100;
       const tickets = await this.ticketRepository
         .createQueryBuilder('tickets')
-        .select(['tickets.id', 'tickets.priority', 'tickets.createdAt'])
-        .where('tickets.status = :status', { status: TicketStatusEnum.SUBMITTED })
+        .select(['tickets.id', 'tickets.status', 'tickets.createdAt'])
+        .where('tickets.status = :status', { status: TicketStatusEnum.REQUESTED })
         .andWhere(`tickets.created_at < NOW() - INTERVAL '24 hours'`)
         .orderBy('tickets.createdAt', 'ASC')
         .getMany();
@@ -276,7 +292,7 @@ export class TicketsService {
           .update(Ticket)
           .set({
             ...ticket,
-            priority: 1,
+            status: TicketStatusEnum.PRIORITY,
           })
           .where('id = :id', { id: ticket.id })
           .execute();

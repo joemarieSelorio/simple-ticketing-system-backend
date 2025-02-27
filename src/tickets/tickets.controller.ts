@@ -61,11 +61,11 @@ export class TicketsController {
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @Get('/me')
-  @ApiOperation({ summary: 'Get user submitted tickets' })
+  @ApiOperation({ summary: 'Get user requested tickets' })
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 400, description: 'BadRequest' })
-  async getSubmittedTickets(
+  async getRequestedTickets(
     @Query() query: GetTicketsQueryDto,
     @Req() req: Request,
   ) {
@@ -101,5 +101,17 @@ export class TicketsController {
       userId: parseInt(user.id),
       assigned: isAssignedBool,
     });
+  }
+
+  @Roles(UserRole.ADMIN)
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @Post('/priority')
+  @ApiOperation({ summary: 'Get all tickets' })
+  @ApiResponse({ status: 200, description: 'Success' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 400, description: 'BadRequest' })
+  async setTicketPriorty() {
+    return await this.ticketsService.updateTicketPriority();
   }
 }

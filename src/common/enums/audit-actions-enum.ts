@@ -1,6 +1,6 @@
 export enum AuditActions {
   CREATED = 'created',
-  SUBMITTED = 'submitted',
+  REQUESTED = 'requested',
   UPDATE = 'updated',
   APPROVED = 'approved',
   REJECTED = 'rejected',

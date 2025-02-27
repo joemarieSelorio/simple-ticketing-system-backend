@@ -23,7 +23,7 @@ export class CreateAuditTable1740193850960 implements MigrationInterface {
             type: 'enum',
             enum:[
                 AuditActions.CREATED,
-                AuditActions.SUBMITTED,
+                AuditActions.REQUESTED,
                 AuditActions.UPDATE,
                 AuditActions.APPROVED,
                 AuditActions.REJECTED,

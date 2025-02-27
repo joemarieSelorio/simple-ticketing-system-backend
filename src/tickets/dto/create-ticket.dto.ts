@@ -25,7 +25,7 @@ export class CreateTicketDto {
     description: 'status of the ticket',
   })
   @IsNotEmpty()
-  @IsIn([TicketStatusEnum.CREATED, TicketStatusEnum.SUBMITTED])
+  @IsIn([TicketStatusEnum.CREATED, TicketStatusEnum.REQUESTED])
   status: TicketStatusEnum;
 
   @ApiProperty({
